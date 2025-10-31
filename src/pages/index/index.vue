@@ -1,7 +1,7 @@
 <template>
   <view class="page">
-    <view class="header">
-      <text class="title">集卡地图 · 龙亭区</text>
+  <view class="header">
+      <text class="title">集卡地图 · 云台山</text>
       <text class="count">已收集：{{ collectedCount }}/{{ poiList.length }}</text>
     </view>
 
@@ -54,57 +54,64 @@ export default {
       showList: false,
       collected: new Set(),
       activePoi: null,
-      // 近似龙亭区范围（lat,lng），高德需转为 [lng,lat]
-      bounds: [[34.795, 114.352], [34.804, 114.371]],
+      // 云台山近似范围（lat,lng），高德需转为 [lng,lat]
+      bounds: [[35.4200, 113.3400], [35.4450, 113.3800]],
       poiList: [
         {
-          id: 'longting-hall',
-          name: '龙亭大殿',
-          desc: '龙亭核心景点，大殿巍峨壮观。',
-          image: 'https://images.unsplash.com/photo-1528909514045-2fa4ac7a08ba?w=800&q=80',
-          latlng: [34.7995, 114.3612],
+          id: 'hongshixia',
+          name: '红石峡（温盘峪）',
+          desc: '丹霞地貌代表，外旷内幽，泉瀑溪潭相汇。',
+          image: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=800&q=80',
+          latlng: [35.4315, 113.3578],
         },
         {
-          id: 'wuyue-stele',
-          name: '五岳真形碑',
-          desc: '历代传承文物，见证古城文化。',
+          id: 'tanpoxia',
+          name: '潭瀑峡',
+          desc: '太行秀水，瀑、泉、溪、潭密布，步步生景。',
+          image: 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=800&q=80',
+          latlng: [35.4305, 113.3645],
+        },
+        {
+          id: 'quanpoxia',
+          name: '泉瀑峡（云台天瀑）',
+          desc: '单级落差约314米，枯水期有补水装置增强观赏。',
+          image: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=800&q=80',
+          latlng: [35.4285, 113.3680],
+        },
+        {
+          id: 'zhuyufeng',
+          name: '茱萸峰',
+          desc: '云台山主峰，玄帝宫与玻璃栈道所在，登高望远。',
+          image: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&q=80',
+          latlng: [35.4420, 113.3490],
+        },
+        {
+          id: 'mihougu',
+          name: '猕猴谷',
+          desc: '太行猕猴群落栖居地，趣味性强的动物观赏区。',
+          image: 'https://images.unsplash.com/photo-1558981359-9e3e0c9f6254?w=800&q=80',
+          latlng: [35.4250, 113.3520],
+        },
+        {
+          id: 'zifanghu',
+          name: '子房湖',
+          desc: '云台山东区最大湖泊，湖光山色相映，环境幽静。',
+          image: 'https://images.unsplash.com/photo-1506421547861-8ffcb08fe5a6?w=800&q=80',
+          latlng: [35.4375, 113.3720],
+        },
+        {
+          id: 'diecaidong',
+          name: '叠彩洞',
+          desc: '沿山体开凿的盘山公路洞群，景致独特。',
           image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&q=80',
-          latlng: [34.799, 114.3598],
+          latlng: [35.4390, 113.3605],
         },
         {
-          id: 'songhu-gate',
-          name: '嵩呼门',
-          desc: '园区古门坊，亦称叫呼、高呼。',
-          image: 'https://images.unsplash.com/photo-1549875146-2096d5b0a6bd?w=800&q=80',
-          latlng: [34.7979, 114.3665],
-        },
-        {
-          id: 'east-lake-tea',
-          name: '东湖茶舍',
-          desc: '湖畔茶香，休憩观景的好去处。',
-          image: 'https://images.unsplash.com/photo-1517638851339-4aa32003c11a?w=800&q=80',
-          latlng: [34.7972, 114.3679],
-        },
-        {
-          id: 'jiulong-ting',
-          name: '九龙亭',
-          desc: '古典亭台，龙纹华丽。',
+          id: 'wanshansi',
+          name: '万善寺',
+          desc: '明代古寺，宗教文化底蕴浓厚，环境清幽。',
           image: 'https://images.unsplash.com/photo-1520975916090-3105956dac38?w=800&q=80',
-          latlng: [34.8002, 114.3583],
-        },
-        {
-          id: 'yudai-bridge',
-          name: '玉带桥',
-          desc: '拱桥如玉带，横跨碧波。',
-          image: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800&q=80',
-          latlng: [34.7968, 114.3653],
-        },
-        {
-          id: 'food-plaza',
-          name: '美食广场',
-          desc: '逛园尝鲜，地道开封味道。',
-          image: 'https://images.unsplash.com/photo-1543353071-873f17a7a5c9?w=800&q=80',
-          latlng: [34.7988, 114.3567],
+          latlng: [35.4385, 113.3465],
         },
       ],
       markers: [],
@@ -203,7 +210,7 @@ export default {
       if (!this.activePoi) return
       this.collected.add(this.activePoi.id)
       this.persistCollected()
-      this.addMarkers()
+      this.addMarkersGaode(AMap)
     },
     toggleList() {
       this.showList = !this.showList
