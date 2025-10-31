@@ -45,8 +45,7 @@
 </template>
 
 <script>
-import L from 'leaflet'
-import 'leaflet/dist/leaflet.css'
+import AMapLoader from '@amap/amap-jsapi-loader'
 
 export default {
   data() {
@@ -55,7 +54,7 @@ export default {
       showList: false,
       collected: new Set(),
       activePoi: null,
-      // 近似龙亭区范围（H5 体验用，实际可替换为更精确边界）
+      // 近似龙亭区范围（lat,lng），高德需转为 [lng,lat]
       bounds: [[34.795, 114.352], [34.804, 114.371]],
       poiList: [
         {
@@ -135,63 +134,68 @@ export default {
       uni.setStorageSync('collected-cards', Array.from(this.collected))
     },
     initMap() {
-      const center = [
-        (this.bounds[0][0] + this.bounds[1][0]) / 2,
-        (this.bounds[0][1] + this.bounds[1][1]) / 2,
-      ]
-      this.map = L.map('map', {
-        zoomControl: false,
-        maxBounds: L.latLngBounds(this.bounds),
-        maxBoundsViscosity: 1.0,
-      }).setView(center, 16)
+      const key = '6afe8ff5aec5b44d1ba9c08235bba145'
+      const centerLat = (this.bounds[0][0] + this.bounds[1][0]) / 2
+      const centerLng = (this.bounds[0][1] + this.bounds[1][1]) / 2
+      const gaodeCenter = [centerLng, centerLat]
+      const gaodeBounds = new Array(2)
+      gaodeBounds[0] = [this.bounds[0][1], this.bounds[0][0]]
+      gaodeBounds[1] = [this.bounds[1][1], this.bounds[1][0]]
 
-      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap',
-        maxZoom: 19,
-      }).addTo(this.map)
+      AMapLoader.load({
+        key,
+        version: '2.0',
+        plugins: ['AMap.Scale', 'AMap.ToolBar'],
+      }).then(AMap => {
+        this.map = new AMap.Map('map', {
+          viewMode: '2D',
+          zoom: 16,
+          center: gaodeCenter,
+        })
 
-      // 根据容器尺寸动态计算让视窗“完全在范围内”的最小缩放级别，防止缩出边界
-      const boundsObj = L.latLngBounds(this.bounds)
-      const minZoom = this.map.getBoundsZoom(boundsObj, true)
-      this.map.setMinZoom(minZoom)
-      // 初始视图贴合指定范围
-      this.map.fitBounds(boundsObj)
+        const bounds = new AMap.Bounds(gaodeBounds[0], gaodeBounds[1])
+        this.map.setLimitBounds(bounds)
 
-      // 边界可视化（可选）
-      L.rectangle(boundsObj, { color: '#2563eb', weight: 1, fillOpacity: 0 }).addTo(this.map)
+        // 可视化边界（可选）
+        const rect = new AMap.Rectangle({ bounds, strokeColor: '#2563eb', strokeWeight: 1, fillOpacity: 0 })
+        this.map.add(rect)
 
-      // 移动/缩放后强制保持在范围内
-      const keepInside = () => this.map.panInsideBounds(boundsObj, { animate: true })
-      this.map.on('moveend', keepInside)
-      this.map.on('zoomend', keepInside)
+        // 让视图贴合边界并据此计算“最小允许缩放”
+        this.map.setFitView([rect])
+        const minZoom = this.map.getZoom()
+        this.map.setZooms([minZoom, 20])
 
-      this.addMarkers()
-    },
-    markerIcon(collected) {
-      const color = collected ? '#10b981' : '#f59e0b'
-      return L.divIcon({
-        className: 'custom-marker',
-        html: `<div style="background:${color};color:#fff;padding:6px 10px;border-radius:16px;box-shadow:0 2px 6px rgba(0,0,0,.2);font-size:12px;">打卡</div>`,
-        iconSize: [40, 24],
-        iconAnchor: [20, 24],
+        this.addMarkersGaode(AMap)
+      }).catch(e => {
+        console.error('AMapLoader error:', e)
       })
     },
-    addMarkers() {
-      this.markers.forEach(m => m.remove())
+    markerContent(collected) {
+      const color = collected ? '#10b981' : '#f59e0b'
+      return `<div style="background:${color};color:#fff;padding:6px 10px;border-radius:16px;box-shadow:0 2px 6px rgba(0,0,0,.2);font-size:12px;">打卡</div>`
+    },
+    addMarkersGaode(AMap) {
+      // 清理旧标记
+      this.markers.forEach(m => this.map.remove(m))
       this.markers = []
       this.poiList.forEach(p => {
-        const m = L.marker(p.latlng, { icon: this.markerIcon(this.collected.has(p.id)) })
-        m.addTo(this.map)
-        m.on('click', () => {
-          this.activePoi = p
+        const pos = [p.latlng[1], p.latlng[0]] // 转换为 [lng,lat]
+        const marker = new AMap.Marker({
+          position: pos,
+          anchor: 'bottom-center',
+          content: this.markerContent(this.collected.has(p.id)),
+          title: p.name,
         })
-        this.markers.push(m)
+        marker.on('click', () => { this.activePoi = p })
+        this.map.add(marker)
+        this.markers.push(marker)
       })
     },
     flyTo(p) {
       this.showList = false
       if (this.map) {
-        this.map.flyTo(p.latlng, 18, { duration: 0.8 })
+        const pos = [p.latlng[1], p.latlng[0]]
+        this.map.setZoomAndCenter(18, pos)
       }
       this.activePoi = p
     },
